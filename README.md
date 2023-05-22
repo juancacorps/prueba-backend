@@ -7,7 +7,7 @@ Lenguaje: Python, version (3.10)
 ## Librerias que estoy utilizando
 
 * requests
-* fastapia
+* fastapi
 * uvicorn
 
 
