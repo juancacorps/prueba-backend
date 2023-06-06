@@ -6,7 +6,8 @@ Lenguaje: Python, version (3.10)
 
 ## Librerias que estoy utilizando
 
-* requests
+* asyncio
+* aiohttp
 * fastapi
 * uvicorn
 
@@ -18,9 +19,7 @@ Lenguaje: Python, version (3.10)
 
 ## ¿Como correr la API?
 
-    python3 api.py
+   uvicorn api:app
    
 ## Ver cambios:
-ir a la siguiente URL: http://127.0.0.1:5000/
-para ver los cambios con interfaz:
-http://127.0.0.1:5000/docs#/default/read_ids__get
+ir a la siguiente URL: http://127.0.0.1:8000/ids
