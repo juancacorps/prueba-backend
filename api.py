@@ -1,34 +1,45 @@
+import asyncio
+import aiohttp
+
 from fastapi import FastAPI
-import uvicorn
-import requests
-
 app = FastAPI()
-URL = 'https://api.chucknorris.io/jokes/random'
 
-@app.get('/')
-def read_ids():
-    """API GET requests"""
-    data = get_chucknorris_ids(URL, 25)
-    return {"ids": data}
-
-def get_chucknorris_ids(URL, limit_consult):
+async def get_list_ids():
     """
-    Función para obtener los ids de la URL donde devolvera los ids que no se repitan
-    parms: URl = URL a consumir, limit_consult = limite de ids que traera el array
-    return: array de ids distintos de la API
+        Crea tareas asincronas con (N) cantidad. mandando a llamar la funcion:
+        get_id_chucknorris. se crea la variable ids con tipo set para que no almancene
+        ids repetidos.
     """
-    ids = []
-    run = True
-    limit_consult = limit_consult
-    while run:
-        re = requests.get(URL)
-        if re.status_code == 200:
-            data = re.json()
-            if data["id"] not in ids:
-                ids.append(data["id"])
-        if len(ids) == limit_consult:
-            run = False
+    range_ids = 25
+    ids = set()
+    async with aiohttp.ClientSession() as session:
+        tasks = []
+        for _ in range(range_ids):
+            task = asyncio.ensure_future(get_id_chucknorris(session))
+            tasks.append(task)
+        completed_tasks, _ = await asyncio.wait(tasks)
+        for task in completed_tasks:
+            new_id = task.result()
+            ids.add(new_id)    
     return ids
 
+async def get_id_chucknorris(session):
+    """
+        Utilizando aiohttp se crea la petición para traer la informacion
+        de manera asincrona.
+    """
+    async with session.get('https://api.chucknorris.io/jokes/random') as response:
+        if response.status == 200:
+            data = await response.json()
+            return data["id"]
+        else:
+            return False
+
+@app.get("/ids")
+async def get_ids():
+    ids = await get_list_ids()
+    return {"ids": list(ids)}
+
 if __name__ == "__main__":
-    uvicorn.run("api:app", port=5000)
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(app.main())
